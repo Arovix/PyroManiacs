@@ -125,6 +125,13 @@ var update = function (speed) {
 	}
 	
 	//Redo it all for the zombie
+	// This needs to be re-written where each char is and object, 
+	// and the function is detectCollisions(char object). Then
+	// we can just store all of the enemies in an array and loop
+	// through it calling this function on each one. 
+	// To do this I need to figure out how to make a character class
+	// and make zombies and the pyro inherit from it.
+	
 	//Gravity
 	if (!zombie.onGround && zJump < 20) {
 		zombie.y -= zombie.jumpHeight;
