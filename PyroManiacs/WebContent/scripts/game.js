@@ -31,12 +31,22 @@ zombieImage.onload = function () {
 zombieImage.src = "images/zombie.png";
 
 var pyro = {
+		height: 36,
+		width: 32,
 		speed: 4,
+		gravity: 4,
+		jumpHeight: 6,
+		onGround: false,
 		life: 3,
 		damage: 1
 };
 var zombie = {
-		speed: 1,
+		height: 36,
+		width: 32,
+		speed: 2,
+		gravity: 4,
+		jumpHeight: 6,
+		onGround: false,
 		life: 2,
 		damage: 1
 };
@@ -57,17 +67,21 @@ addEventListener("keyup", function (e) {
 //Reset the game to the start state
 var reset = function () {
 	pyro.x = canvas.width / 2;
-	pyro.y = canvas.height - (32 + 36);
+	pyro.y = canvas.height - (32 + pyro.height);
 	
-	zombie.x = canvas.width / 2;
+	zombie.x = 2 * zombie.width;
 	zombie.y = canvas.height / 2;
 };
 
+var jump = 20;
+var zJump = 20;
 //Update all of the objects
 var update = function (speed) {
+	
 	//Up arrow
-	if (38 in keysPressed) {
-		pyro.y -= pyro.speed;
+	if (38 in keysPressed && pyro.onGround) {
+		pyro.y -= pyro.jumpHeight;
+		pyro.onGround = false;
 	}
 	//Down arrow
 	if (40 in keysPressed) {
@@ -82,11 +96,62 @@ var update = function (speed) {
 		pyro.x += pyro.speed;
 	}
 	
+	//Gravity
+	if (!pyro.onGround && jump < 20) {
+		pyro.y -= pyro.jumpHeight;
+		jump++;
+	}
+	else if	(!pyro.onGround && jump < 22) {
+		jump++;
+	}
+	else {
+		pyro.y += pyro.gravity;
+	}
+	
 	//Check collisions
-	if (pyro.x < 0 ) { pyro.x = 0; }
-	if (pyro.x > canvas.width - 32) { pyro.x = canvas.width - 32;}
-	if (pyro.y < 0 ) { pyro.y = 0; }
-	if (pyro.y > canvas.height - (32 + 36)) { pyro.y = canvas.height - (32 + 36);}
+	if (pyro.x < 0 ) { 
+		pyro.x = 0; 
+	}
+	if (pyro.x > canvas.width - pyro.width) { 
+		pyro.x = canvas.width - pyro.width;
+	}
+	if (pyro.y < 0 ) { 
+		pyro.y = 0; 
+	}
+	if (pyro.y > canvas.height - (32 + pyro.height)) { 
+		pyro.y = canvas.height - (32 + pyro.height);
+		pyro.onGround = true;
+		jump = 0;
+	}
+	
+	//Redo it all for the zombie
+	//Gravity
+	if (!zombie.onGround && zJump < 20) {
+		zombie.y -= zombie.jumpHeight;
+		zJump++;
+	}
+	else if	(!zombie.onGround && zJump < 22) {
+		zJump++;
+	}
+	else {
+		zombie.y += zombie.gravity;
+	}
+	
+	//Check collisions
+	if (zombie.x < 0 ) { 
+		zombie.x = 0; 
+	}
+	if (zombie.x > canvas.width - zombie.width) { 
+		zombie.x = canvas.width - zombie.width;
+	}
+	if (zombie.y < 0 ) { 
+		zombie.y = 0; 
+	}
+	if (zombie.y > canvas.height - (32 + zombie.height)) { 
+		zombie.y = canvas.height - (32 + zombie.height);
+		zombie.onGround = true;
+		zJump = 0;
+	}
 };
 
 //Draw Screen
