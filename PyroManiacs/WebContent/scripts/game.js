@@ -105,7 +105,6 @@ var Block = Class.extend({
 
 // ----- Create Characters -----
 var characters = new Array();
-var blocks = new Array();
 
 var pyro = new Pyro(0, 0);
 pyro.setImage("images/pyro.png");
@@ -115,8 +114,25 @@ var zombie = new Zombie(0, 0);
 zombie.setImage("images/zombie.png");
 characters[1] = zombie;
 
-var block1 = new Block(32,32);
-blocks[0] = block1;
+// ----- Create Levels -----
+var currentLevel = 0;
+var levels = new Array();
+var level_0 = new Array();
+
+level_0[0] = new Block(64,376);
+level_0[1] = new Block(96,376);
+level_0[2] = new Block(128,376);
+level_0[3] = new Block(160,376);
+level_0[4] = new Block(224,304);
+level_0[5] = new Block(256,304);
+level_0[6] = new Block(288,304);
+level_0[7] = new Block(320,304);
+level_0[8] = new Block(384,376);
+level_0[9] = new Block(416,376);
+level_0[10] = new Block(448,376);
+level_0[11] = new Block(480,376);
+
+levels[0] = level_0;
 
 var kills = 0;
 var coins = 0;
@@ -203,13 +219,20 @@ var update = function () {
 
 // ----- Draw the Objects -----
 var render = function () {
+	// Draw background
 	if (backgroundReady) {
 		context.drawImage(backgroundImage, 0, 0);
 	}
+
+	// Draw Characters
+	for (var i = 0; i < characters.length; i++){
+		context.drawImage(characters[i].image, characters[i].x, characters[i].y);
+	}
 	
-	context.drawImage(pyro.image, pyro.x, pyro.y);
-	context.drawImage(zombie.image, zombie.x, zombie.y);
-	context.drawImage(block1.image, block1.x, block1.y);
+	// Draw Level's Static Objects
+	for (var j = 0; j < levels[currentLevel].length; j++){
+		context.drawImage(levels[currentLevel][j].image, levels[currentLevel][j].x, levels[currentLevel][j].y);
+	}
 	
 	/*
 	ctx.fillStyle = "rgb(250, 250, 250)";
