@@ -127,17 +127,22 @@ var zombie = {
 };
 
 var block = Class.extend({
-	init: function(x, y) {
+	init: function (x, y) {
 		this.setPosition(x, y);
 		this.setImage("images/block.png");
+		this.setBoundries(32, 32);
 	},
-	setPosition: function(x, y) {
+	setPosition: function (x, y) {
 		this.x = x;
 		this.y = y;
 	},
-	setImage: function(img) {
+	setImage: function (img) {
 		this.image = new Image();
 		this.image.src = img;
+	},
+	setBoundries: function (width, height){
+		this.width = width;
+		this.height = height;
 	}
 });
 
@@ -267,7 +272,7 @@ var render = function () {
 	}
 	
 	//if (block1.imageReady) {
-		ctx.drawImage(block1.image, 32, 32);
+		ctx.drawImage(block1.image, block1.x, block1.y);
 	//}
 	
 	
