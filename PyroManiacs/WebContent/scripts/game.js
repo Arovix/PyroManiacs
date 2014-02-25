@@ -51,6 +51,7 @@ var zombie = {
 		damage: 1
 };
 
+/*
 var block = Class.extend({
 	init: function(x, y) {
 		this.setPosition(x, y);
@@ -71,6 +72,7 @@ var block = Class.extend({
 
 block.init(32,32);
 block.setImage("images/block.png");
+*/
 
 var kills = 0;
 var coins = 0;
@@ -97,7 +99,7 @@ var reset = function () {
 var jump = 20;
 var zJump = 20;
 //Update all of the objects
-var update = function (speed) {
+var update = function () {
 	
 	//Up arrow
 	if (38 in keysPressed && pyro.onGround) {
@@ -209,16 +211,9 @@ var render = function () {
 
 //Main loop
 var main = function () {
-	var now = Date.now();
-	var d = now - start;
-	
-	update(d / 1000);
+	update();
 	render();
-	out.println("Hello World!");
-	
-	start = now;
 };
 
 reset();
-var start = Date.now();
 setInterval(main, 1);
