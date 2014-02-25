@@ -1,87 +1,15 @@
 
-/*
-We are using the following code as a library, in order to implement object oriented programming in JavaScript.
-*/
+// Basic Game
+// Team Tux
 
-var reflection = {};
-
-//http://ejohn.org/blog/simple-javascript-inheritance/
-(function(){
-	var initializing = false, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
-
-	// The base Class implementation (does nothing)
-	this.Class = function(){};
-   
-	// Create a new Class that inherits from this class
-	Class.extend = function(prop, ref_name) {
-		if(ref_name)
-			reflection[ref_name] = Class;
-			
-		var _super = this.prototype;
-
-		// Instantiate a base class (but only create the instance,
-		// don't run the init constructor)
-		initializing = true;
-		var prototype = new this();
-		initializing = false;
-		 
-		// Copy the properties over onto the new prototype
-		for (var name in prop) {
-		// Check if we're overwriting an existing function
-		prototype[name] = typeof prop[name] == "function" && 
-			typeof _super[name] == "function" && fnTest.test(prop[name]) ?
-			(function(name, fn) {
-				return function() {
-					var tmp = this._super;
-
-					// Add a new ._super() method that is the same method
-					// but on the super-class
-					this._super = _super[name];
-
-					// The method only need to be bound temporarily, so we
-					// remove it when we're done executing
-					var ret = fn.apply(this, arguments);        
-					this._super = tmp;
-
-					return ret;
-				};
-			})(name, prop[name]) :
-			prop[name];
-		}
-		 
-		// The dummy class constructor
-		function Class() {
-			// All construction is actually done in the init method
-			if ( !initializing && this.init )
-				this.init.apply(this, arguments);
-		}
-		 
-		// Populate our constructed prototype object
-		Class.prototype = prototype;
-		 
-		// Enforce the constructor to be what we expect
-		Class.prototype.constructor = Class;
-
-		// And make this class extendable
-		Class.extend = arguments.callee;
-		 
-		return Class;
-	};
-})();
-
-/*
- * End Library Code
-*/
-
-//Basic Game
-
+// ----- Initialize Canvas -----
 var canvas = document.createElement("canvas");
-var ctx = canvas.getContext("2d");
+var context = canvas.getContext("2d");
 canvas.width = 640;
 canvas.height = 480;
 document.body.appendChild(canvas);
 
-//Load Background
+// ----- Load Background Image -----
 var backgroundReady = false;
 var backgroundImage = new Image();
 backgroundImage.onload = function () {
@@ -89,44 +17,67 @@ backgroundImage.onload = function () {
 };
 backgroundImage.src = "images/background.png";
 
-//Load Pyro
-var pyroReady = false;
-var pyroImage = new Image();
-pyroImage.onload = function () {
-	pyroReady = true;
-};
-pyroImage.src = "images/pyro.png";
+// ------ Moving Characters Class -----
+var Character = Class.extend({
+	init: function (x, y) {
+		this.setPosition(x, y);
+	},
+	setPosition: function (x, y) {
+		this.x = x;
+		this.y = y;
+	},
+	setImage: function (img) {
+		this.image = new Image();
+		this.image.src = img;
+	}
+});
 
-//Load Background
-var zombieReady = false;
-var zombieImage = new Image();
-zombieImage.onload = function () {
-	zombieReady = true;
-};
-zombieImage.src = "images/zombie.png";
+var Pyro = Character.extend({
+	init: function(x, y) {
+		this._super(x, y);
+		this.height = 36;
+		this.width = 32;
+		this.speed = 4;
+		this.gravity = 4;
+		this.jumpHeight = 6;
+		this.life = 3;
+		this.damage = 1;
+		this.onGround = false;
+	},
+	setPosition: function(x, y) {
+		this.x = x;
+		this.y = y;
+	},
+	setImage: function(image) {
+		this.image = new Image();
+		this.image.src = image;
+	}
+});
 
-var pyro = {
-		height: 36,
-		width: 32,
-		speed: 4,
-		gravity: 4,
-		jumpHeight: 6,
-		onGround: false,
-		life: 3,
-		damage: 1
-};
-var zombie = {
-		height: 36,
-		width: 32,
-		speed: 2,
-		gravity: 4,
-		jumpHeight: 6,
-		onGround: false,
-		life: 2,
-		damage: 1
-};
+var Zombie = Character.extend({
+	init: function(x, y) {
+		this._super(x, y);
+		this.height = 36;
+		this.width = 32;
+		this.speed = 2;
+		this.gravity = 4;
+		this.jumpHeight = 6;
+		this.onGround = false;
+		this.life = 2;
+		this.damage = 1;
+	},
+	setPosition: function(x, y) {
+		this.x = x;
+		this.y = y;
+	},
+	setImage: function(image) {
+		this.image = new Image();
+		this.image.src = image;
+	}
+});
 
-var block = Class.extend({
+// ----- Static Characters Class -----
+var Block = Class.extend({
 	init: function (x, y) {
 		this.setPosition(x, y);
 		this.setImage("images/block.png");
@@ -146,11 +97,25 @@ var block = Class.extend({
 	}
 });
 
-var block1 = new block(32,32);
+// ----- Create Characters -----
+var characters = new Array();
+var blocks = new Array();
+
+var pyro = new Pyro(0, 0);
+pyro.setImage("images/pyro.png");
+characters[0] = pyro;
+
+var zombie = new Zombie(0, 0);
+zombie.setImage("images/zombie.png");
+characters[1] = zombie;
+
+var block1 = new Block(32,32);
+blocks[0] = block1;
 
 var kills = 0;
 var coins = 0;
 
+// ----- Listen for Input -----
 var keysPressed = {};
 
 addEventListener("keydown", function (e) {
@@ -161,7 +126,7 @@ addEventListener("keyup", function (e) {
 	delete keysPressed[e.keyCode];
 }, false);
 
-//Reset the game to the start state
+// ----- Reset the Game -----
 var reset = function () {
 	pyro.x = canvas.width / 2;
 	pyro.y = canvas.height - (32 + pyro.height);
@@ -172,7 +137,8 @@ var reset = function () {
 
 var jump = 20;
 var zJump = 20;
-//Update all of the objects
+
+// ----- Update all of the Objects -----
 var update = function () {
 	
 	//Up arrow
@@ -258,23 +224,15 @@ var update = function () {
 	}
 };
 
-//Draw Screen
+// ----- Draw the Objects -----
 var render = function () {
 	if (backgroundReady) {
-		ctx.drawImage(backgroundImage, 0, 0);
+		context.drawImage(backgroundImage, 0, 0);
 	}
 	
-	if (pyroReady) {
-		ctx.drawImage(pyroImage, pyro.x, pyro.y);
-	}
-	if (zombieReady) {
-		ctx.drawImage(zombieImage, zombie.x, zombie.y);
-	}
-	
-	//if (block1.imageReady) {
-		ctx.drawImage(block1.image, block1.x, block1.y);
-	//}
-	
+	context.drawImage(pyro.image, pyro.x, pyro.y);
+	context.drawImage(zombie.image, zombie.x, zombie.y);
+	context.drawImage(block1.image, block1.x, block1.y);
 	
 	/*
 	ctx.fillStyle = "rgb(250, 250, 250)";
@@ -285,7 +243,7 @@ var render = function () {
 	*/
 };
 
-//Main loop
+// ----- Main loop -----
 var main = function () {
 	update();
 	render();
