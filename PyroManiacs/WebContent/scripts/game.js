@@ -21,6 +21,10 @@ backgroundImage.src = "images/background.png";
 var Character = Class.extend({
 	init: function (x, y) {
 		this.setPosition(x, y);
+		this.onGround = false;
+		this.gravity = 3;
+		this.speed = 3;
+		this.jumpFrame = 20;
 	},
 	setPosition: function (x, y) {
 		this.x = x;
@@ -40,6 +44,7 @@ var Pyro = Character.extend({
 		this.speed = 4;
 		this.gravity = 4;
 		this.jumpHeight = 6;
+		this.jumpFrame = 20;
 		this.life = 3;
 		this.damage = 1;
 		this.onGround = false;
@@ -62,6 +67,7 @@ var Zombie = Character.extend({
 		this.speed = 2;
 		this.gravity = 4;
 		this.jumpHeight = 6;
+		this.jumpFrame = 20;
 		this.onGround = false;
 		this.life = 2;
 		this.damage = 1;
@@ -135,8 +141,38 @@ var reset = function () {
 	zombie.y = canvas.height / 2;
 };
 
-var jump = 20;
-var zJump = 20;
+
+// ----- Detect Collisions -----
+var collision = function (char) {
+	
+	// ----- Gravity -----
+	if (!char.onGround && char.jumpFrame < 20) {
+		char.y -= char.jumpHeight;
+		char.jumpFrame++;
+	}
+	else if	(!char.onGround && char.jumpFrame < 22) {
+		char.jumpFrame++;
+	}
+	else {
+		char.y += char.gravity;
+	}
+	
+	// ----- Canvas Limits -----
+	if (char.x < 0 ) { 
+		char.x = 0; 
+	}
+	if (char.x > canvas.width - char.width) { 
+		char.x = canvas.width - char.width;
+	}
+	if (char.y < 0 ) { 
+		char.y = 0; 
+	}
+	if (char.y > canvas.height - (32 + char.height)) { 
+		char.y = canvas.height - (32 + char.height);
+		char.onGround = true;
+		char.jumpFrame = 0;
+	}
+};
 
 // ----- Update all of the Objects -----
 var update = function () {
@@ -159,68 +195,9 @@ var update = function () {
 		pyro.x += pyro.speed;
 	}
 	
-	//Gravity
-	if (!pyro.onGround && jump < 20) {
-		pyro.y -= pyro.jumpHeight;
-		jump++;
-	}
-	else if	(!pyro.onGround && jump < 22) {
-		jump++;
-	}
-	else {
-		pyro.y += pyro.gravity;
-	}
-	
-	//Check collisions
-	if (pyro.x < 0 ) { 
-		pyro.x = 0; 
-	}
-	if (pyro.x > canvas.width - pyro.width) { 
-		pyro.x = canvas.width - pyro.width;
-	}
-	if (pyro.y < 0 ) { 
-		pyro.y = 0; 
-	}
-	if (pyro.y > canvas.height - (32 + pyro.height)) { 
-		pyro.y = canvas.height - (32 + pyro.height);
-		pyro.onGround = true;
-		jump = 0;
-	}
-	
-	//Redo it all for the zombie
-	// This needs to be re-written where each char is and object, 
-	// and the function is detectCollisions(char object). Then
-	// we can just store all of the enemies in an array and loop
-	// through it calling this function on each one. 
-	// To do this I need to figure out how to make a character class
-	// and make zombies and the pyro inherit from it.
-	
-	//Gravity
-	if (!zombie.onGround && zJump < 20) {
-		zombie.y -= zombie.jumpHeight;
-		zJump++;
-	}
-	else if	(!zombie.onGround && zJump < 22) {
-		zJump++;
-	}
-	else {
-		zombie.y += zombie.gravity;
-	}
-	
-	//Check collisions
-	if (zombie.x < 0 ) { 
-		zombie.x = 0; 
-	}
-	if (zombie.x > canvas.width - zombie.width) { 
-		zombie.x = canvas.width - zombie.width;
-	}
-	if (zombie.y < 0 ) { 
-		zombie.y = 0; 
-	}
-	if (zombie.y > canvas.height - (32 + zombie.height)) { 
-		zombie.y = canvas.height - (32 + zombie.height);
-		zombie.onGround = true;
-		zJump = 0;
+	// Collision detection for characters
+	for (var i = 0; i < characters.length; i++){
+		collision(characters[i]);
 	}
 };
 
