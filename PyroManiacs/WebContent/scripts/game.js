@@ -50,7 +50,28 @@ var zombie = {
 		life: 2,
 		damage: 1
 };
-var gravity = 3; // pixels per second falling down
+
+var block = Class.extend({
+	init: function(x, y) {
+		this.setPosition(x, y);
+	},
+	setPosition: function(x, y) {
+		this.x = x;
+		this.y = y;
+	},
+	setImage: function(img) {
+		this.imageReady = false;
+		this.image = new Image();
+		this.image.onload = function() {
+			this.imageReady = true;
+		};
+		this.image.src = img;
+	}
+});
+
+block.init(32,32);
+block.setImage("images/block.png");
+
 var kills = 0;
 var coins = 0;
 
@@ -172,6 +193,9 @@ var render = function () {
 	}
 	if (zombieReady) {
 		ctx.drawImage(zombieImage, zombie.x, zombie.y);
+	}
+	if (block.imageReady) {
+		ctx.drawImage(block.image, block.x, block.y);
 	}
 	
 	/*
